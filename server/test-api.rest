@@ -1,0 +1,70 @@
+### Test Book Store API
+### Base URL: http://localhost:3226
+
+### 1. Seed Database - Insert 10 books (including John Smith with 5 books)
+POST http://localhost:3226/books/seed
+Content-Type: application/json
+
+###
+
+### 2. Get All Books
+GET http://localhost:3226/books
+
+###
+
+### 3. Create a New Book
+POST http://localhost:3226/books
+Content-Type: application/json
+
+{
+  "title": "New Programming Book",
+  "author_first_name": "Test",
+  "author_last_name": "Author",
+  "publishing_year": 2026,
+  "category": "Technology",
+  "num_of_favorites": 50,
+  "description": "Test description",
+  "isbn": "978-9999999999"
+}
+
+###
+
+### QUERY 1: Books Created This Year (2026)
+GET http://localhost:3226/books/query/created-this-year
+
+###
+
+### QUERY 2: Authors with At Least 5 Books
+GET http://localhost:3226/books/query/authors-with-5-books
+
+###
+
+### QUERY 3: Programming Books in Technology Category
+GET http://localhost:3226/books/query/programming-technology
+
+###
+
+### QUERY 4: Books with Specific Fields (id, title, author_full_name, publishing_year, num_of_favorites)
+GET http://localhost:3226/books/query/specific-fields
+
+###
+
+### Get Book by ID (replace :id with actual book ID)
+GET http://localhost:3226/books/65c123456789abcdef123456
+
+###
+
+### Update Book (replace :id with actual book ID)
+PATCH http://localhost:3226/books/65c123456789abcdef123456
+Content-Type: application/json
+
+{
+  "num_of_favorites": 500
+}
+
+###
+
+### Delete Book (replace :id with actual book ID)
+DELETE http://localhost:3226/books/65c123456789abcdef123456
+
+###
