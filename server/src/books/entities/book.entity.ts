@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
+import { BookCategory } from './book-category.enum';
 
 export type BookDocument = Book & Document;
 
@@ -8,7 +9,7 @@ export class Book {
   @Prop({ required: true, index: true })
   title: string;
 
-  @Prop({ type: Types.ObjectId, ref: 'Author', required: true })
+  @Prop({ type: Types.ObjectId, ref: 'Author' })
   author: Types.ObjectId;
 
   // Keep legacy fields for backward compatibility
@@ -21,7 +22,7 @@ export class Book {
   @Prop({ required: true })
   publishing_year: number;
 
-  @Prop({ required: true })
+  @Prop({ required: true, enum: Object.values(BookCategory) })
   category: string;
 
   @Prop({ default: 0 })
@@ -32,6 +33,9 @@ export class Book {
 
   @Prop()
   isbn: string;
+
+  @Prop()
+  image_url: string;
 
   @Prop({ default: Date.now })
   created_at: Date;

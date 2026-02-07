@@ -1,110 +1,187 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Button from './components/ui/button';
+import React, { useEffect, useMemo, useState } from 'react';
 import Navbar from './components/navbar';
 import Footer from './components/footer';
+import BookCard from './components/ui/book-card';
+import Select from './components/ui/select';
+
+interface Book {
+  _id: string;
+  title: string;
+  author_first_name?: string;
+  author_last_name?: string;
+  publishing_year?: number;
+  category?: string;
+  image_url?: string;
+}
+
+interface Category {
+  value: string;
+  label: string;
+  key: string;
+}
 
 const HomePage = () => {
-  const router = useRouter();
-  const [user, setUser] = useState<any>(null);
+  const [books, setBooks] = useState<Book[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [filters, setFilters] = useState({
+    category: '',
+    year: '',
+    author: '',
+  });
 
   useEffect(() => {
-    const token = localStorage.getItem('access_token');
-    const userData = localStorage.getItem('user');
-    if (token && userData) {
-      setUser(JSON.parse(userData));
-    }
+    let active = true;
+
+    const loadBooks = async () => {
+      setLoading(true);
+      setError('');
+
+      try {
+        const response = await fetch('http://localhost:3226/books');
+        if (!response.ok) {
+          throw new Error('Tải sách thất bại');
+        }
+        const data = await response.json();
+        if (active) {
+          setBooks(Array.isArray(data) ? data : []);
+        }
+      } catch (err: any) {
+        if (active) {
+          setError(err.message || 'Tải sách thất bại');
+        }
+      } finally {
+        if (active) {
+          setLoading(false);
+        }
+      }
+    };
+
+    const loadCategories = async () => {
+      try {
+        const response = await fetch('http://localhost:3226/books/categories');
+        if (response.ok) {
+          const data = await response.json();
+          if (active) {
+            setCategories(Array.isArray(data) ? data : []);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load categories:', err);
+      }
+    };
+
+    loadBooks();
+    loadCategories();
+    return () => {
+      active = false;
+    };
   }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('user');
-    setUser(null);
-    router.push('/login');
-  };
+  const yearOptions = useMemo(() => {
+    const values = new Set<string>();
+    books.forEach((book) => {
+      if (book.publishing_year) values.add(String(book.publishing_year));
+    });
+    return Array.from(values)
+      .sort()
+      .map((value) => ({ value, label: value }));
+  }, [books]);
+
+  const authorOptions = useMemo(() => {
+    const values = new Set<string>();
+    books.forEach((book) => {
+      const first = book.author_first_name || '';
+      const last = book.author_last_name || '';
+      const full = `${first} ${last}`.trim();
+      if (full) values.add(full);
+    });
+    return Array.from(values)
+      .sort()
+      .map((value) => ({ value, label: value }));
+  }, [books]);
+
+  const filteredBooks = useMemo(() => {
+    return books.filter((book) => {
+      const categoryOk = filters.category
+        ? book.category === filters.category
+        : true;
+      const yearOk = filters.year
+        ? String(book.publishing_year || '') === filters.year
+        : true;
+      const authorFull = `${book.author_first_name || ''} ${book.author_last_name || ''}`.trim();
+      const authorOk = filters.author ? authorFull === filters.author : true;
+      return categoryOk && yearOk && authorOk;
+    });
+  }, [books, filters]);
 
   return (
     <div className='min-h-screen flex flex-col'>
       <Navbar />
-      <div className='flex-1 container mx-auto p-8'>
+      <div className='flex-1 container mx-auto p-6'>
         <div className='card bg-base-100 shadow-xl'>
-          <div className='card-body'>
-            <h1 className='text-4xl font-bold mb-4'>
-              📚 Welcome to the Book Store
-            </h1>
-            
-            {user ? (
-              <div className='space-y-4'>
-                <div className='alert alert-success'>
-                  <span>✓ Welcome back, {user.full_name}!</span>
-                </div>
-                
-                <div className='stats shadow'>
-                  <div className='stat'>
-                    <div className='stat-title'>Logged in as</div>
-                    <div className='stat-value text-2xl'>{user.email}</div>
-                    <div className='stat-desc'>Role: {user.roles?.join(', ') || 'User'}</div>
-                  </div>
-                </div>
+          <div className='card-body space-y-6'>
+            <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'>
+              <Select
+                options={categories}
+                placeholder='Tất cả thể loại'
+                value={filters.category}
+                onChange={(e) => setFilters({ ...filters, category: e.target.value })}
+                label='Thể loại'
+                size='sm'
+              />
+              <Select
+                options={yearOptions}
+                placeholder='Tất cả năm'
+                value={filters.year}
+                onChange={(e) => setFilters({ ...filters, year: e.target.value })}
+                label='Năm xuất bản'
+                size='sm'
+              />
+              <Select
+                options={authorOptions}
+                placeholder='Tất cả tác giả'
+                value={filters.author}
+                onChange={(e) => setFilters({ ...filters, author: e.target.value })}
+                label='Tác giả'
+                size='sm'
+              />
+            </div>
 
-                <div className='flex gap-4 flex-wrap'>
-                  <Button variant='primary' size='lg'>
-                    Browse Books
-                  </Button>
-                  <Button variant='secondary' size='lg'>
-                    View Authors
-                  </Button>
-                  <Button variant='error' onClick={handleLogout}>
-                    Logout
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <div className='space-y-4'>
-                <div className='alert alert-info'>
-                  <span>Please login to access the book store</span>
-                </div>
-                
-                <div className='flex gap-4 flex-wrap'>
-                  <Button variant='primary' size='lg' onClick={() => router.push('/login')}>
-                    Login
-                  </Button>
-                  <Button variant='secondary' size='lg' onClick={() => router.push('/register')}>
-                    Register
-                  </Button>
-                  <Button variant='accent' size='lg'>
-                    Shop Now
-                  </Button>
-                </div>
+            {loading && (
+              <div className='text-center text-sm text-base-content/60'>Đang tải sách...</div>
+            )}
+
+            {error && (
+              <div className='alert alert-error'>
+                <span>{error}</span>
               </div>
             )}
 
-            <div className='divider'></div>
+            {!loading && !error && filteredBooks.length === 0 && (
+              <div className='text-center text-sm text-base-content/60'>No books found.</div>
+            )}
 
-            <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
-              <div className='card bg-base-200'>
-                <div className='card-body'>
-                  <h2 className='card-title'>📖 Books Collection</h2>
-                  <p>Browse and manage our extensive collection of books</p>
-                </div>
+            {!loading && !error && filteredBooks.length > 0 && (
+              <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4'>
+                {filteredBooks.map((book) => {
+                  const authorFull = `${book.author_first_name || ''} ${book.author_last_name || ''}`.trim();
+                  return (
+                    <BookCard
+                      key={book._id}
+                      title={book.title}
+                      author={authorFull || 'Không rõ tác giả'}
+                      imageUrl={book.image_url}
+                      size='a5'
+                    />
+                  );
+                })}
               </div>
-              
-              <div className='card bg-base-200'>
-                <div className='card-body'>
-                  <h2 className='card-title'>✍️ Authors</h2>
-                  <p>Discover authors and their published works</p>
-                </div>
-              </div>
-              
-              <div className='card bg-base-200'>
-                <div className='card-body'>
-                  <h2 className='card-title'>👤 Your Account</h2>
-                  <p>Manage your profile and preferences</p>
-                </div>
-              </div>
-            </div>
+            )}
           </div>
         </div>
       </div>

@@ -3,7 +3,11 @@ import { Document } from 'mongoose';
 
 export type AuthorDocument = Author & Document;
 
-@Schema({ timestamps: true })
+@Schema({ 
+  timestamps: true,
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
+})
 export class Author {
   @Prop({ required: true })
   first_name: string;
@@ -31,3 +35,10 @@ export class Author {
 }
 
 export const AuthorSchema = SchemaFactory.createForClass(Author);
+
+// Virtual populate to get books by this author
+AuthorSchema.virtual('books', {
+  ref: 'Book',
+  localField: '_id',
+  foreignField: 'author',
+});

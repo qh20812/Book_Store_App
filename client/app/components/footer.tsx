@@ -5,8 +5,7 @@ const Footer = () => {
     <footer className="footer sm:footer-horizontal footer-center bg-base-300 text-base-content p-4">
       <aside>
         <p>
-          Copyright © {new Date().getFullYear()} - All right reserved by ACME
-          Industries Ltd
+          Bản quyền © {new Date().getFullYear()} - Bản quyền thuộc về Huỳnh Ngọc Quí
         </p>
       </aside>
     </footer>

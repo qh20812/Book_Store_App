@@ -7,6 +7,11 @@ import { UpdateBookDto } from './dto/update-book.dto';
 export class BooksController {
   constructor(private readonly booksService: BooksService) {}
 
+  @Get('categories')
+  getCategories() {
+    return this.booksService.getCategories();
+  }
+
   @Post()
   create(@Body() createBookDto: CreateBookDto) {
     return this.booksService.create(createBookDto);

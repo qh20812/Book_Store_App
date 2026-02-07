@@ -28,6 +28,17 @@ export class AuthorsService {
     return author;
   }
 
+  async findOneWithBooks(id: string) {
+    const author = await this.authorModel
+      .findById(id)
+      .populate('books')
+      .exec();
+    if (!author) {
+      throw new NotFoundException(`Author with ID ${id} not found`);
+    }
+    return author;
+  }
+
   async findByName(first_name: string, last_name: string): Promise<Author | null> {
     return this.authorModel.findOne({ first_name, last_name }).exec();
   }

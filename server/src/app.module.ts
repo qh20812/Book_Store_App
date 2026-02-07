@@ -10,6 +10,7 @@ import { AuthorsModule } from './authors/authors.module';
 
 @Module({
   imports: [
+    // kết nối với mongo db bằng mongoose module và url từ biến môi trường
     MongooseModule.forRoot(MONGO_URL),
     BooksModule,
     AuthModule,

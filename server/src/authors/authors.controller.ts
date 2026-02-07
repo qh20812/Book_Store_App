@@ -27,6 +27,11 @@ export class AuthorsController {
     return this.authorsService.seedAuthors();
   }
 
+  @Get(':id/books')
+  findOneWithBooks(@Param('id') id: string) {
+    return this.authorsService.findOneWithBooks(id);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.authorsService.findOne(id);

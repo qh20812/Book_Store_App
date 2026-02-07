@@ -36,15 +36,15 @@ export default function RegisterPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Registration failed');
+        throw new Error(data.message || 'Đăng ký thất bại');
       }
 
-      setSuccess('Registration successful! Redirecting to login...');
+      setSuccess('Đăng ký thành công! Chuyển hướng đến trang đăng nhập...');
       setTimeout(() => {
         router.push('/login');
       }, 2000);
     } catch (err: any) {
-      setError(err.message || 'Something went wrong');
+      setError(err.message || 'Đã có lỗi xảy ra');
     } finally {
       setLoading(false);
     }
@@ -56,7 +56,7 @@ export default function RegisterPage() {
         <div className="card bg-base-100 shadow-xl">
           <div className="card-body">
             <h2 className="card-title text-3xl font-bold text-center mb-6">
-              Create Account
+              Tạo tài khoản
             </h2>
 
             {error && (
@@ -74,34 +74,34 @@ export default function RegisterPage() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <Input
                 type="text"
-                placeholder="Full Name"
+                placeholder="Họ và tên"
                 icon={<UserIcon />}
                 value={formData.full_name}
                 onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
                 required
                 minLength={2}
-                validationHint="Please enter your full name (at least 2 characters)"
+                validationHint="Vui lòng nhập họ và tên (ít nhất 2 ký tự)"
               />
 
               <Input
                 type="email"
-                placeholder="Email"
+                placeholder="Địa chỉ email"
                 icon={<EmailIcon />}
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 required
-                validationHint="Please enter a valid email address"
+                validationHint="Vui lòng nhập địa chỉ email hợp lệ"
               />
 
               <Input
                 type="password"
-                placeholder="Password"
+                placeholder="Mật khẩu"
                 icon={<PasswordIcon />}
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 required
                 minLength={6}
-                validationHint="Password must be at least 6 characters long"
+                validationHint="Mật khẩu phải ít nhất 6 ký tự"
               />
 
               <Button
@@ -111,16 +111,16 @@ export default function RegisterPage() {
                 disabled={loading}
                 className="mt-6"
               >
-                {loading ? 'Creating Account...' : 'Register'}
+                {loading ? 'Đang tạo tài khoản...' : 'Đăng ký'}
               </Button>
             </form>
 
-            <div className="divider">OR</div>
+            <div className="divider">HOẶC</div>
 
             <p className="text-center text-sm">
-              Already have an account?{' '}
+              Đã có tài khoản?{' '}
               <a href="/login" className="link link-primary">
-                Login here
+                Đăng nhập tại đây
               </a>
             </p>
           </div>

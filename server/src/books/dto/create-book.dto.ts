@@ -1,20 +1,27 @@
-import { IsString, IsNumber, IsOptional, Min } from 'class-validator';
+import { IsString, IsNumber, IsOptional, Min, IsEnum } from 'class-validator';
+import { BookCategory } from '../entities/book-category.enum';
 
 export class CreateBookDto {
   @IsString()
   title: string;
 
+  @IsOptional()
   @IsString()
-  author_first_name: string;
+  author?: string;
 
+  @IsOptional()
   @IsString()
-  author_last_name: string;
+  author_first_name?: string;
+
+  @IsOptional()
+  @IsString()
+  author_last_name?: string;
 
   @IsNumber()
   @Min(1000)
   publishing_year: number;
 
-  @IsString()
+  @IsEnum(BookCategory, { message: 'Category must be a valid book category' })
   category: string;
 
   @IsOptional()
@@ -29,4 +36,8 @@ export class CreateBookDto {
   @IsOptional()
   @IsString()
   isbn?: string;
+
+  @IsOptional()
+  @IsString()
+  image_url?: string;
 }
