@@ -1,14 +1,16 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
 import { Book, BookDocument } from './entities/book.entity';
+import { Author, AuthorDocument } from '../authors/entities/author.entity';
 
 @Injectable()
 export class BooksService {
   constructor(
     @InjectModel(Book.name) private bookModel: Model<BookDocument>,
+    @InjectModel(Author.name) private authorModel: Model<AuthorDocument>,
   ) {}
 
   // Create a new book
@@ -22,9 +24,14 @@ export class BooksService {
     return this.bookModel.find().exec();
   }
 
+  // Find all books with author details populated
+  async findAllWithAuthors() {
+    return this.bookModel.find().populate('author').exec();
+  }
+
   // Find one book by ID
   async findOne(id: string): Promise<Book> {
-    const book = await this.bookModel.findById(id).exec();
+    const book = await this.bookModel.findById(id).populate('author').exec();
     if (!book) {
       throw new NotFoundException(`Book with ID ${id} not found`);
     }
@@ -136,9 +143,25 @@ export class BooksService {
       return { message: 'Database already contains books. Skipping seed.' };
     }
 
+    // First, get or create authors
+    const johnSmith = await this.authorModel.findOne({ first_name: 'John', last_name: 'Smith' });
+    const janeDoe = await this.authorModel.findOne({ first_name: 'Jane', last_name: 'Doe' });
+    const aliceJohnson = await this.authorModel.findOne({ first_name: 'Alice', last_name: 'Johnson' });
+    const bobWilson = await this.authorModel.findOne({ first_name: 'Bob', last_name: 'Wilson' });
+    const emilyBrown = await this.authorModel.findOne({ first_name: 'Emily', last_name: 'Brown' });
+    const michaelDavis = await this.authorModel.findOne({ first_name: 'Michael', last_name: 'Davis' });
+
+    if (!johnSmith || !janeDoe || !aliceJohnson || !bobWilson || !emilyBrown || !michaelDavis) {
+      return { 
+        message: 'Please seed authors first using POST /authors/seed',
+        error: 'Authors not found in database'
+      };
+    }
+
     const books = [
       {
         title: 'JavaScript Programming: The Complete Guide',
+        author: johnSmith._id,
         author_first_name: 'John',
         author_last_name: 'Smith',
         publishing_year: 2024,
@@ -149,6 +172,7 @@ export class BooksService {
       },
       {
         title: 'Python Programming for Beginners',
+        author: janeDoe._id,
         author_first_name: 'Jane',
         author_last_name: 'Doe',
         publishing_year: 2025,
@@ -159,6 +183,7 @@ export class BooksService {
       },
       {
         title: 'Advanced Programming Techniques',
+        author: johnSmith._id,
         author_first_name: 'John',
         author_last_name: 'Smith',
         publishing_year: 2023,
@@ -169,6 +194,7 @@ export class BooksService {
       },
       {
         title: 'Web Development Mastery',
+        author: aliceJohnson._id,
         author_first_name: 'Alice',
         author_last_name: 'Johnson',
         publishing_year: 2026,
@@ -179,6 +205,7 @@ export class BooksService {
       },
       {
         title: 'Database Design Principles',
+        author: bobWilson._id,
         author_first_name: 'Bob',
         author_last_name: 'Wilson',
         publishing_year: 2024,
@@ -189,6 +216,7 @@ export class BooksService {
       },
       {
         title: 'Mobile App Development',
+        author: johnSmith._id,
         author_first_name: 'John',
         author_last_name: 'Smith',
         publishing_year: 2025,
@@ -199,6 +227,7 @@ export class BooksService {
       },
       {
         title: 'Machine Learning Fundamentals',
+        author: johnSmith._id,
         author_first_name: 'John',
         author_last_name: 'Smith',
         publishing_year: 2026,
@@ -209,6 +238,7 @@ export class BooksService {
       },
       {
         title: 'Cloud Computing Essentials',
+        author: johnSmith._id,
         author_first_name: 'John',
         author_last_name: 'Smith',
         publishing_year: 2024,
@@ -219,6 +249,7 @@ export class BooksService {
       },
       {
         title: 'The Art of Fiction',
+        author: emilyBrown._id,
         author_first_name: 'Emily',
         author_last_name: 'Brown',
         publishing_year: 2023,
@@ -229,6 +260,7 @@ export class BooksService {
       },
       {
         title: 'Modern History Overview',
+        author: michaelDavis._id,
         author_first_name: 'Michael',
         author_last_name: 'Davis',
         publishing_year: 2022,
@@ -240,6 +272,6 @@ export class BooksService {
     ];
 
     await this.bookModel.insertMany(books);
-    return { message: 'Successfully seeded 10 books', count: books.length };
+    return { message: 'Successfully seeded 10 books with author references', count: books.length };
   }
 }

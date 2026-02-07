@@ -6,6 +6,7 @@ import { BooksModule } from './books/books.module';
 import { MONGO_URL } from './constant';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
+import { AuthorsModule } from './authors/authors.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { UsersModule } from './users/users.module';
     BooksModule,
     AuthModule,
     UsersModule,
+    AuthorsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

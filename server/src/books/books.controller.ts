@@ -17,6 +17,11 @@ export class BooksController {
     return this.booksService.findAll();
   }
 
+  @Get('with-authors')
+  findAllWithAuthors() {
+    return this.booksService.findAllWithAuthors();
+  }
+
   @Get('query/created-this-year')
   findBooksCreatedThisYear() {
     return this.booksService.findBooksCreatedThisYear();

@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
 
 export type BookDocument = Book & Document;
 
@@ -8,10 +8,14 @@ export class Book {
   @Prop({ required: true, index: true })
   title: string;
 
-  @Prop({ required: true })
+  @Prop({ type: Types.ObjectId, ref: 'Author', required: true })
+  author: Types.ObjectId;
+
+  // Keep legacy fields for backward compatibility
+  @Prop()
   author_first_name: string;
 
-  @Prop({ required: true })
+  @Prop()
   author_last_name: string;
 
   @Prop({ required: true })
